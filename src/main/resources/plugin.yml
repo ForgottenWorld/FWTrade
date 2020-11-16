@@ -1,0 +1,11 @@
+name: FWTrade
+version: ${project.version}
+main: me.architetto.fwtrade.FWTrade
+api-version: 1.16
+authors: [ Architetto ]
+description: wip
+commands:
+  fwtrade:
+    description: Trade plugin gui.
+    aliases:
+      - fwt

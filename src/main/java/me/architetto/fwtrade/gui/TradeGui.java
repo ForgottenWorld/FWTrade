@@ -7,6 +7,7 @@ import com.github.stefvanschie.inventoryframework.pane.Pane;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
+import org.bukkit.event.inventory.InventoryMoveItemEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
@@ -67,15 +68,31 @@ public class TradeGui {
 
         OutlinePane inventoryL = new OutlinePane(0, 1, 3, 5, Pane.Priority.HIGH);
         inventoryL.setOnClick(inventoryClickEvent -> {
-            if (inventoryClickEvent.getWhoClicked().getUniqueId() == playerTwo)
-                inventoryClickEvent.setCancelled(true);});
+            if (inventoryClickEvent.getCurrentItem() == null)
+                return;
+            if (inventoryClickEvent.getWhoClicked().getUniqueId() == playerTwo){
+                inventoryClickEvent.setCancelled(true);
+                return;
+            }
+            inventoryClickEvent.setCancelled(true);
+            inventoryClickEvent.getWhoClicked().getInventory().addItem(inventoryClickEvent.getCurrentItem());
+            inventoryClickEvent.getCurrentItem().setAmount(0);
+        });
         this.inventoryL = inventoryL;
         tradeGUI.addPane(inventoryL);
 
         OutlinePane inventoryR = new OutlinePane(6, 1, 3, 5, Pane.Priority.HIGH);
         inventoryR.setOnClick(inventoryClickEvent -> {
-            if (inventoryClickEvent.getWhoClicked().getUniqueId() == playerOne)
-                inventoryClickEvent.setCancelled(true);});
+            if (inventoryClickEvent.getCurrentItem() == null)
+                return;
+            if (inventoryClickEvent.getWhoClicked().getUniqueId() == playerTwo){
+                inventoryClickEvent.setCancelled(true);
+                return;
+            }
+            inventoryClickEvent.setCancelled(true);
+            inventoryClickEvent.getWhoClicked().getInventory().addItem(inventoryClickEvent.getCurrentItem());
+            inventoryClickEvent.getCurrentItem().setAmount(0);
+        });
         this.inventoryR = inventoryR;
         tradeGUI.addPane(inventoryR);
 

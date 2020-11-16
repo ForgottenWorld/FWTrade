@@ -9,6 +9,8 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.*;
 
+import java.util.Objects;
+
 
 public class InventoryListener implements Listener {
 
@@ -40,24 +42,19 @@ public class InventoryListener implements Listener {
     }
 
     @EventHandler
-    public void onInventoryMoveItem(InventoryMoveItemEvent event) {
+    public void onInventoryMoveItem(InventoryClickEvent event) {
 
-        Bukkit.getConsoleSender().sendMessage("TEST UNO");
-
-
-        if (!(event.getSource().getHolder() instanceof Player))
+        if (!(event.getWhoClicked() instanceof Player))
             return;
 
-        Bukkit.getConsoleSender().sendMessage("TEST DUE");
+        Player player = (Player) event.getWhoClicked();
 
-        Player player = (Player) event.getSource().getHolder();
-
-        if (tradeManager.isTrading(player.getUniqueId())) {
+        if (tradeManager.isTrading(player.getUniqueId()) && Objects.equals(event.getClickedInventory(), player.getInventory())) {
             TradeGui tradeGui = tradeManager.getTradeGui(player.getUniqueId());
-            if (event.getDestination().equals(tradeGui.getGui().getInventory())) {
+            if (tradeGui.isAddable(player.getUniqueId()) && event.getCurrentItem() != null) {
+                tradeGui.addItemToInventory(player.getUniqueId(), event.getCurrentItem());
+                event.getCurrentItem().setAmount(0);
                 event.setCancelled(true);
-                if (tradeGui.isAddable(player.getUniqueId()))
-                    tradeGui.addItemToInventory(player.getUniqueId(),event.getItem());
             }
         }
     }

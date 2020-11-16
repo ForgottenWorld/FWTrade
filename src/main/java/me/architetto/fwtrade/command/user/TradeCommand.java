@@ -50,10 +50,13 @@ public class TradeCommand extends SubCommand {
             return;
         }
 
+        /*
         if (secondTrader.equals(sender)) {
             sender.sendMessage(ChatFormatter.formatErrorMessage(Message.ERR_SELF_INVITE));
             return;
         }
+
+         */
 
         TradeManager tradeManager = TradeManager.getInstance();
 

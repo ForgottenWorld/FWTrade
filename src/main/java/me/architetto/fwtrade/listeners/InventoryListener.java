@@ -18,6 +18,7 @@ public class InventoryListener implements Listener {
 
     @EventHandler
     public void onInvetoryClose(InventoryCloseEvent event) {
+
         if (!(event.getPlayer() instanceof Player))
             return;
 
@@ -25,6 +26,7 @@ public class InventoryListener implements Listener {
 
         if (tradeManager.isTrading(player.getUniqueId())) {
             TradeGui tradeGui = tradeManager.getTradeGui(player.getUniqueId());
+            tradeGui.getRelativeContent(player.getUniqueId());
             Player secondTrader = Bukkit.getPlayer(tradeGui.getOtherTrader(player.getUniqueId()));
 
             if (secondTrader != null && !secondTrader.equals(player)) { //todo il secondo check va tolto , è solo per evitare errori in testing
@@ -46,6 +48,8 @@ public class InventoryListener implements Listener {
 
         if (!(event.getWhoClicked() instanceof Player))
             return;
+
+        //event.getClick() potrei analizzare il tipo di click ??  credo di si
 
         Player player = (Player) event.getWhoClicked();
 

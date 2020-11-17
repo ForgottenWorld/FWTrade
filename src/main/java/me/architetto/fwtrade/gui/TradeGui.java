@@ -11,10 +11,7 @@ import org.bukkit.event.inventory.InventoryMoveItemEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 
 public class TradeGui {
 
@@ -85,7 +82,7 @@ public class TradeGui {
         inventoryR.setOnClick(inventoryClickEvent -> {
             if (inventoryClickEvent.getCurrentItem() == null)
                 return;
-            if (inventoryClickEvent.getWhoClicked().getUniqueId() == playerTwo){
+            if (inventoryClickEvent.getWhoClicked().getUniqueId() == playerOne){
                 inventoryClickEvent.setCancelled(true);
                 return;
             }
@@ -114,18 +111,23 @@ public class TradeGui {
 
     public void addItemToInventory(UUID uuid,ItemStack itemStack) {
 
-        if (playerOne == uuid)
+        if (playerOne == uuid) {
             inventoryL.addItem(new GuiItem(itemStack));
-        if (playerTwo == uuid)
+            tradeGui.update();
+            return;
+        }
+        if (playerTwo == uuid) {
             inventoryR.addItem(new GuiItem(itemStack));
+            tradeGui.update();
+        }
 
     }
 
-    public boolean isTradeStatusLeft() {
+    public boolean isPlayerOneTradeReady() {
         return this.tradeStatusLeft;
     }
 
-    public boolean isTradeStaturRight(){
+    public boolean isPlayerTwoTradeReady(){
         return tradeStaturRight;
     }
 
@@ -140,6 +142,24 @@ public class TradeGui {
         }
         return false;
         //todo va inserito anche per i slot a destra (al momento funziona solo a sinistra
+    }
+
+    public void getRelativeContent(UUID uuid) {
+
+        //todo il metodo sembra ok per ottenere una lista che rispecchia l'inventario
+        ItemStack[] itemStacks = tradeGui.getInventory().getStorageContents();
+        int i = 0;
+        for (ItemStack itemStack : itemStacks) {
+            if (itemStack != null)
+                Bukkit.getConsoleSender().sendMessage(itemStack.getI18NDisplayName() + "[" + i + "]");
+            else
+                Bukkit.getConsoleSender().sendMessage("null" + "[" + i + "]");
+
+            i++;
+
+        }
+
+
     }
 
     public UUID getOtherTrader(UUID uuid) {

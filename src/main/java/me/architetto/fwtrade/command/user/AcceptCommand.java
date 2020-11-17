@@ -6,6 +6,7 @@ import me.architetto.fwtrade.gui.TradeManager;
 import me.architetto.fwtrade.utils.ChatFormatter;
 import me.architetto.fwtrade.utils.Message;
 import org.bukkit.Bukkit;
+import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
 
 import java.util.List;
@@ -42,6 +43,11 @@ public class AcceptCommand extends SubCommand {
 
         if (tradeSender == null || !tradeSender.isOnline()) {
             sender.sendMessage(ChatFormatter.formatErrorMessage(Message.ERR_PLAYER_OFFLINE));
+            return;
+        }
+
+        if (sender.getGameMode() == GameMode.CREATIVE || tradeSender.getGameMode() == GameMode.CREATIVE) {
+            sender.sendMessage(ChatFormatter.formatErrorMessage("No creative mode ty"));
             return;
         }
 

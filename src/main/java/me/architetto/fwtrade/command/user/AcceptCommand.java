@@ -46,14 +46,14 @@ public class AcceptCommand extends SubCommand {
             return;
         }
 
-        if (sender.getGameMode() == GameMode.CREATIVE || tradeSender.getGameMode() == GameMode.CREATIVE) {
-            sender.sendMessage(ChatFormatter.formatErrorMessage("No creative mode ty"));
+        if (sender.getGameMode() != GameMode.SURVIVAL || tradeSender.getGameMode() != GameMode.SURVIVAL) {
+            sender.sendMessage(ChatFormatter.formatErrorMessage(Message.ERR_GAMEMODE));
             return;
         }
 
         TradeManager tradeManager = TradeManager.getInstance();
 
-        if (tradeManager.getInviter(tradeSender.getUniqueId()) != sender.getUniqueId()) {
+        if (tradeManager.getRecevingInvite(tradeSender.getUniqueId()) != sender.getUniqueId()) {
             sender.sendMessage(ChatFormatter.formatErrorMessage(Message.ERR_NO_INVITE_FOUND));
             return;
         }

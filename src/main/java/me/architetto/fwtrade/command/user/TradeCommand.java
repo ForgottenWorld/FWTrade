@@ -9,6 +9,7 @@ import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
@@ -43,6 +44,11 @@ public class TradeCommand extends SubCommand {
             return;
         }
 
+        if (sender.getGameMode() != GameMode.SURVIVAL) {
+            sender.sendMessage(ChatFormatter.formatErrorMessage(Message.ERR_GAMEMODE));
+            return;
+        }
+
         Player secondTrader = Bukkit.getPlayer(args[1]);
 
         if (secondTrader == null || !secondTrader.isOnline()) {
@@ -58,6 +64,11 @@ public class TradeCommand extends SubCommand {
 
         TradeManager tradeManager = TradeManager.getInstance();
 
+        if (tradeManager.getRecevingInvite(sender.getUniqueId()) != null) {
+            sender.sendMessage(ChatFormatter.formatErrorMessage("Hai già mandato un invito, attendi qualche secondo!"));
+            return;
+        }
+
         if (tradeManager.isTrading(sender.getUniqueId(), secondTrader.getUniqueId())) {
             sender.sendMessage(ChatFormatter.formatErrorMessage(Message.ERR_PLAYER_BUSY));
             return;
@@ -68,7 +79,7 @@ public class TradeCommand extends SubCommand {
 
         secondTrader.sendMessage(new TextComponent(ChatFormatter.formatSuccessMessage(sender.getDisplayName() + " ti ha invitato a commerciare. ")),acceptInvite);
 
-        tradeManager.addTradeInvite(secondTrader.getUniqueId(),sender.getUniqueId());
+        tradeManager.addTradeInvite(sender.getUniqueId(), secondTrader.getUniqueId());
 
         sender.sendMessage(ChatFormatter.formatSuccessMessage("Hai invitato " + secondTrader.getDisplayName() + " a commerciare."));
 
@@ -82,7 +93,7 @@ public class TradeCommand extends SubCommand {
                 sender.sendMessage(ChatFormatter.formatErrorMessage(secondTrader.getDisplayName() + "non ha accettato l'invito."));
 
             }
-        }.runTaskLater(FWTrade.plugin,1200);
+        }.runTaskLater(FWTrade.plugin,600);
         tradeManager.addInviteID(sender.getUniqueId(),bukkitTask.getTaskId());
 
     }

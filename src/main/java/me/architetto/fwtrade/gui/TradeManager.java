@@ -3,20 +3,22 @@ package me.architetto.fwtrade.gui;
 import java.util.HashMap;
 import java.util.UUID;
 
-public class TradeManager{
+public class TradeManager {
 
     private static TradeManager tradeManager;
 
-    private HashMap<UUID,TradeGui> tradersList;
     private HashMap<UUID,UUID> tradeInvite;
+
     private HashMap<UUID,Integer> inviteID;
+
+    private HashMap<UUID,TradeGui> tradersList;
 
     private TradeManager() {
         if(tradeManager != null) {
             throw new RuntimeException("Use getInstance() method to get the single instance of this class.");
         }
 
-        this.tradersList = new HashMap<UUID, TradeGui>();
+        this.tradersList = new HashMap<>();
         this.tradeInvite = new HashMap<>();
 
         this.inviteID = new HashMap<>();
@@ -33,8 +35,8 @@ public class TradeManager{
         return tradersList.get(uuid);
     }
 
-    public boolean isTrading(UUID player1) {
-        return tradersList.containsKey(player1);
+    public boolean isTrading(UUID player) {
+        return tradersList.containsKey(player);
     }
 
     public boolean isTrading(UUID player1, UUID player2) {
@@ -49,11 +51,11 @@ public class TradeManager{
         tradersList.put(uuid,tradeGui);
     }
 
-    public void addTradeInvite(UUID receivingplayer, UUID playerSender) {
+    public void addTradeInvite(UUID playerSender, UUID receivingplayer) {
         tradeInvite.put(playerSender,receivingplayer);
     }
 
-    public UUID getInviter(UUID player1) {
+    public UUID getRecevingInvite(UUID player1) {
         return tradeInvite.get(player1);
     }
 

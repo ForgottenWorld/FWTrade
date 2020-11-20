@@ -1,5 +1,7 @@
 package me.architetto.fwtrade.listeners;
 
+import com.github.stefvanschie.inventoryframework.Gui;
+import com.github.stefvanschie.inventoryframework.GuiListener;
 import me.architetto.fwtrade.gui.TradeManager;
 import me.architetto.fwtrade.gui.TradeGui;
 
@@ -16,6 +18,7 @@ public class InventoryListener implements Listener {
 
     TradeManager tradeManager = TradeManager.getInstance();
 
+    /*
     @EventHandler
     public void onInvetoryClose(InventoryCloseEvent event) {
 
@@ -25,11 +28,12 @@ public class InventoryListener implements Listener {
         Player player = (Player) event.getPlayer();
 
         if (tradeManager.isTrading(player.getUniqueId())) {
+
             TradeGui tradeGui = tradeManager.getTradeGui(player.getUniqueId());
             tradeGui.getRelativeContent(player.getUniqueId());
             Player secondTrader = Bukkit.getPlayer(tradeGui.getOtherTrader(player.getUniqueId()));
 
-            if (secondTrader != null && !secondTrader.equals(player)) { //todo il secondo check va tolto , è solo per evitare errori in testing
+            if (secondTrader != null) {
                 secondTrader.closeInventory();
 
                 tradeManager.removeTrader(player.getUniqueId());
@@ -43,22 +47,25 @@ public class InventoryListener implements Listener {
 
     }
 
+     */
+
     @EventHandler
     public void onInventoryMoveItem(InventoryClickEvent event) {
 
         if (!(event.getWhoClicked() instanceof Player))
             return;
 
-        //event.getClick() potrei analizzare il tipo di click ??  credo di si
-
         Player player = (Player) event.getWhoClicked();
+        Bukkit.getConsoleSender().sendMessage(player.getDisplayName());
 
-        if (tradeManager.isTrading(player.getUniqueId()) && Objects.equals(event.getClickedInventory(), player.getInventory())) {
+        if (tradeManager.isTrading(player.getUniqueId())
+                && event.getClickedInventory() == player.getOpenInventory().getBottomInventory()) {
             TradeGui tradeGui = tradeManager.getTradeGui(player.getUniqueId());
-            if (tradeGui.isAddable(player.getUniqueId()) && event.getCurrentItem() != null) {
-                tradeGui.addItemToInventory(player.getUniqueId(), event.getCurrentItem());
-                event.getCurrentItem().setAmount(0);
-                event.setCancelled(true);
+            if (tradeGui.isAddable(player) && event.getCurrentItem() != null) {
+                tradeGui.addItemToPaneInventory(player, event.getCurrentItem());
+                tradeGui.updateGui();
+                player.getOpenInventory().getBottomInventory().remove(event.getCurrentItem());
+                //event.setCancelled(true);
             }
         }
     }

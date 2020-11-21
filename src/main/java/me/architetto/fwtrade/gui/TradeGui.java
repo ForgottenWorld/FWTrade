@@ -229,8 +229,8 @@ public class TradeGui {
 
     private boolean checkTradeStatus() {
         if (tradeStatusSx && tradeStatusDx) {
-            addPanelContentToInventory(playerOne, "LEFT");
-            addPanelContentToInventory(playerTwo,"RIGHT");
+            addPanelContentToInventory(playerOne,"RIGHT");
+            addPanelContentToInventory(playerTwo,"LEFT");
             TradeManager.getInstance().removeTrader(playerOne.getUniqueId());
             TradeManager.getInstance().removeTrader(playerTwo.getUniqueId());
             isClosed = true;

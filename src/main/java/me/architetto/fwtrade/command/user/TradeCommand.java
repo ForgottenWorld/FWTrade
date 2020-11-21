@@ -102,15 +102,4 @@ public class TradeCommand extends SubCommand {
     public List<String> getSubcommandArguments(Player player, String[] args){
         return null;
     }
-
-
-
-
-    /*
-        addMoneyPaneL.addItem(new GuiItem(new ItemStack(Material.LIME_STAINED_GLASS_PANE),event -> { event.setCancelled(true);
-        midSection.clear();
-        midSection.addItem(new GuiItem(new ItemStack(Material.GREEN_STAINED_GLASS_PANE)));
-        tradeGUI.update();}));
-
- */
 }

@@ -26,16 +26,12 @@ public class TradeGui {
     private OutlinePane leftPane;
     private OutlinePane rightPane;
 
-    private final boolean tradeStatusLeft;
-    private final boolean tradeStaturRight;
+    private boolean tradeStatusSx;
+    private boolean tradeStatusDx;
 
     private final HashMap<UUID, Boolean> clickCD;
 
     private boolean isClosed;
-
-    //List<Integer> indexLeft = Arrays.asList(0, 1, 2, 9, 10, 11, 18, 19, 20, 27, 28, 29, 36, 37, 38, 45, 46, 47);
-    //List<Integer> indexRight = Arrays.asList(6, 7, 8, 15, 16, 17, 24, 25, 26, 33, 34, 35, 42, 43, 44, 51, 52, 53);
-
 
     public TradeGui(Player playerOne,Player playerTwo) {
         this.playerOne = playerOne;
@@ -43,8 +39,8 @@ public class TradeGui {
 
         this.tradeGui = prepareGui();
 
-        this.tradeStatusLeft = false;
-        this.tradeStaturRight = false;
+        this.tradeStatusSx = false;
+        this.tradeStatusDx = false;
 
         this.clickCD = new HashMap<UUID, Boolean>() {{
             put(playerOne.getUniqueId(), false);
@@ -60,7 +56,7 @@ public class TradeGui {
                 + "FW" + ChatColor.RESET + " TRADE INTERFACE");
 
         OutlinePane infoPaper = new OutlinePane(4,0,1,1);
-        infoPaper.addItem(new GuiItem(itemTaxInfo()));
+        infoPaper.addItem(new GuiItem(itemINFO()));
         infoPaper.setOnClick(inventoryClickEvent -> inventoryClickEvent.setCancelled(true));
         tradeGUI.addPane(infoPaper);
 
@@ -80,15 +76,19 @@ public class TradeGui {
         chestInfoItemSx.setOnClick(inventoryClickEvent -> inventoryClickEvent.setCancelled(true));
         tradeGUI.addPane(chestInfoItemSx);
 
-        OutlinePane tradeStatusLeft = new OutlinePane(3, 1, 1, 2, Pane.Priority.LOW);
-        tradeStatusLeft.addItem(new GuiItem(new ItemStack(Material.WHITE_STAINED_GLASS_PANE)));
-        tradeStatusLeft.setOnClick(inventoryClickEvent -> inventoryClickEvent.setCancelled(true));
-        tradeStatusLeft.setRepeat(true);
-        tradeGUI.addPane(tradeStatusLeft);
+        OutlinePane tradeStatusPaneSx = new OutlinePane(3, 1, 1, 2, Pane.Priority.LOW);
+        tradeStatusPaneSx.addItem(new GuiItem(new ItemStack(Material.WHITE_STAINED_GLASS_PANE)));
+        tradeStatusPaneSx.setOnClick(inventoryClickEvent -> inventoryClickEvent.setCancelled(true));
+        tradeStatusPaneSx.setRepeat(true);
+        tradeGUI.addPane(tradeStatusPaneSx);
 
         ToggleButton toggleButtonSx = new ToggleButton(3, 3, 1, 1);
         toggleButtonSx.setEnabledItem(new GuiItem(new ItemStack(Material.LIME_STAINED_GLASS_PANE)));
         toggleButtonSx.setDisabledItem(new GuiItem(new ItemStack(Material.RED_STAINED_GLASS_PANE)));
+        toggleButtonSx.setOnClick(inventoryClickEvent -> {
+            tradeStatusSx = !tradeStatusSx;
+            checkTradeStatus();
+        });
         tradeGUI.addPane(toggleButtonSx);
 
         OutlinePane chestInfoItemDx = new OutlinePane(5,0,1,1);
@@ -96,15 +96,19 @@ public class TradeGui {
         chestInfoItemDx.setOnClick(inventoryClickEvent -> inventoryClickEvent.setCancelled(true));
         tradeGUI.addPane(chestInfoItemDx);
 
-        OutlinePane tradeStatusRight = new OutlinePane(5, 1, 1, 2, Pane.Priority.LOW);
-        tradeStatusRight.addItem(new GuiItem(new ItemStack(Material.WHITE_STAINED_GLASS_PANE)));
-        tradeStatusRight.setOnClick(inventoryClickEvent -> inventoryClickEvent.setCancelled(true));
-        tradeStatusRight.setRepeat(true);
-        tradeGUI.addPane(tradeStatusRight);
+        OutlinePane tradeStatusPaneDx = new OutlinePane(5, 1, 1, 2, Pane.Priority.LOW);
+        tradeStatusPaneDx.addItem(new GuiItem(new ItemStack(Material.WHITE_STAINED_GLASS_PANE)));
+        tradeStatusPaneDx.setOnClick(inventoryClickEvent -> inventoryClickEvent.setCancelled(true));
+        tradeStatusPaneDx.setRepeat(true);
+        tradeGUI.addPane(tradeStatusPaneDx);
 
         ToggleButton toggleButtonDx = new ToggleButton(5, 3, 1, 1);
         toggleButtonDx.setEnabledItem(new GuiItem(new ItemStack(Material.LIME_STAINED_GLASS_PANE)));
         toggleButtonDx.setDisabledItem(new GuiItem(new ItemStack(Material.RED_STAINED_GLASS_PANE)));
+        toggleButtonDx.setOnClick(inventoryClickEvent -> {
+            tradeStatusDx = !tradeStatusDx;
+            checkTradeStatus();
+        });
         tradeGUI.addPane(toggleButtonDx);
 
         OutlinePane leftInventory = new OutlinePane(0,0,3,4, Pane.Priority.LOW);
@@ -122,13 +126,6 @@ public class TradeGui {
             this.isClosed = true;
             TradeManager.getInstance().removeTrader(playerOne.getUniqueId());
             TradeManager.getInstance().removeTrader(playerTwo.getUniqueId());
-
-            if (isPlayerOneTradeReady() && isPlayerTwoTradeReady()) {
-                addPanelContentToInventory(playerOne,"right");
-                addPanelContentToInventory(playerTwo,"left");
-                closeTradeInventory();
-                return;
-            }
 
             addPanelContentToInventory(playerOne, "left");
             addPanelContentToInventory(playerTwo, "right");
@@ -210,7 +207,7 @@ public class TradeGui {
     }
 
     private void addPanelContentToInventory(Player player, String string) {
-        switch(string.toLowerCase()) {
+        switch(string.toUpperCase()) {
             case "LEFT":
                 for (GuiItem guiItem : leftPane.getItems()) {
                     player.getInventory().addItem(guiItem.getItem());
@@ -230,23 +227,27 @@ public class TradeGui {
         }
     }
 
-    private boolean isPlayerOneTradeReady() {
-        return this.tradeStatusLeft;
+    private boolean checkTradeStatus() {
+        if (tradeStatusSx && tradeStatusDx) {
+            addPanelContentToInventory(playerOne, "LEFT");
+            addPanelContentToInventory(playerTwo,"RIGHT");
+            TradeManager.getInstance().removeTrader(playerOne.getUniqueId());
+            TradeManager.getInstance().removeTrader(playerTwo.getUniqueId());
+            isClosed = true;
+            closeTradeInventory();
+            return true;
+        }
+        return false;
     }
 
-    private boolean isPlayerTwoTradeReady(){
-        return tradeStaturRight;
-    }
-
-    private ItemStack itemTaxInfo() {
+    private ItemStack itemINFO() {
         ItemStack paperINFO = new ItemStack(Material.PAPER);
         ItemMeta paperINFOmeta = paperINFO.getItemMeta();
-        paperINFOmeta.setDisplayName(ChatColor.YELLOW + "TAX");
+        paperINFOmeta.setDisplayName(ChatColor.YELLOW + "ES. TRADE TAX");
 
         List<String> paperINFOmetaLORE = new ArrayList<>();
-        paperINFOmetaLORE.add(ChatColor.GRAY + "tassa sul commercio ?");
-        paperINFOmetaLORE.add(ChatColor.AQUA + "potrebbe dipendere anche dalla distanza tra i due player");
-        paperINFOmetaLORE.add(ChatColor.RED + "color color color color color");
+        paperINFOmetaLORE.add(ChatColor.GREEN + "tassa sul commercio ?");
+        paperINFOmetaLORE.add(ChatColor.GREEN + "potrebbe dipendere anche dalla distanza tra i due player");
         paperINFOmeta.setLore(paperINFOmetaLORE);
         paperINFO.setItemMeta(paperINFOmeta);
 
@@ -256,11 +257,10 @@ public class TradeGui {
     private ItemStack itemGoldIngot() {
         ItemStack goldIngotItem = new ItemStack(Material.GOLD_INGOT);
         ItemMeta goldIngotMeta = goldIngotItem.getItemMeta();
-        goldIngotMeta.setDisplayName(ChatColor.YELLOW + "ADD MONEY TO TRADE");
+        goldIngotMeta.setDisplayName(ChatColor.YELLOW + "ADD MONEY");
 
         List<String> goldIngotLore = new ArrayList<>();
         goldIngotLore.add(ChatColor.GREEN + "Clicca per aggiungere 100z allo scambio");
-        goldIngotLore.add(ChatColor.GREEN + "Ricorda che gli zenar sono tassati");
         goldIngotMeta.setLore(goldIngotLore);
         goldIngotItem.setItemMeta(goldIngotMeta);
 

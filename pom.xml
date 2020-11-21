@@ -48,6 +48,12 @@
                         <goals>
                             <goal>shade</goal>
                         </goals>
+                        <configuration>
+                            <createDependencyReducedPom>false</createDependencyReducedPom>
+                            <shadedArtifactAttached>true</shadedArtifactAttached>
+                            <outputDirectory>C:\Users\Vin\Desktop\Paper 1.16\plugins</outputDirectory>
+                            <!--<outputDirectory>C:\Users\Simone\Desktop\Minecraft\Server paper\plugins</outputDirectory>-->
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>

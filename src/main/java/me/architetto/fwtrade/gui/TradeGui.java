@@ -4,12 +4,15 @@ import com.github.stefvanschie.inventoryframework.Gui;
 import com.github.stefvanschie.inventoryframework.GuiItem;
 import com.github.stefvanschie.inventoryframework.pane.OutlinePane;
 import com.github.stefvanschie.inventoryframework.pane.Pane;
+import com.github.stefvanschie.inventoryframework.pane.component.ToggleButton;
+import me.architetto.fwtrade.FWTrade;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.*;
 
@@ -23,15 +26,15 @@ public class TradeGui {
     private OutlinePane leftPane;
     private OutlinePane rightPane;
 
-    private HashMap<Integer,GuiItem> insertedGuiItems = new HashMap<>();
-
     private final boolean tradeStatusLeft;
     private final boolean tradeStaturRight;
 
+    private final HashMap<UUID, Boolean> clickCD;
+
     private boolean isClosed;
 
-    List<Integer> indexLeft = Arrays.asList(0, 1, 2, 9, 10, 11, 18, 19, 20, 27, 28, 29, 36, 37, 38, 45, 46, 47);
-    List<Integer> indexRight = Arrays.asList(6, 7, 8, 15, 16, 17, 24, 25, 26, 33, 34, 35, 42, 43, 44, 51, 52, 53);
+    //List<Integer> indexLeft = Arrays.asList(0, 1, 2, 9, 10, 11, 18, 19, 20, 27, 28, 29, 36, 37, 38, 45, 46, 47);
+    //List<Integer> indexRight = Arrays.asList(6, 7, 8, 15, 16, 17, 24, 25, 26, 33, 34, 35, 42, 43, 44, 51, 52, 53);
 
 
     public TradeGui(Player playerOne,Player playerTwo) {
@@ -43,57 +46,76 @@ public class TradeGui {
         this.tradeStatusLeft = false;
         this.tradeStaturRight = false;
 
+        this.clickCD = new HashMap<UUID, Boolean>() {{
+            put(playerOne.getUniqueId(), false);
+            put(playerTwo.getUniqueId(), false);
+        }};
+
         this.isClosed = false;
     }
 
     public Gui prepareGui() {
 
-        Gui tradeGUI = new Gui(4, "TRADE INTERAFCE");
+        Gui tradeGUI = new Gui(4, "       " + ChatColor.YELLOW + "" + ChatColor.BOLD
+                + "FW" + ChatColor.RESET + " TRADE INTERFACE");
 
-        /*
+        OutlinePane infoPaper = new OutlinePane(4,0,1,1);
+        infoPaper.addItem(new GuiItem(itemTaxInfo()));
+        infoPaper.setOnClick(inventoryClickEvent -> inventoryClickEvent.setCancelled(true));
+        tradeGUI.addPane(infoPaper);
 
-        OutlinePane background = new OutlinePane(0, 0, 7, 6, Pane.Priority.LOWEST);
-        tradeGUI.addPane(background);
+        OutlinePane goldIngot = new OutlinePane(4,3,1,1);
+        goldIngot.addItem(new GuiItem(itemGoldIngot()));
+        goldIngot.setOnClick(inventoryClickEvent -> inventoryClickEvent.setCancelled(true));
+        tradeGUI.addPane(goldIngot);
 
-         */
-
-        OutlinePane divider = new OutlinePane(4, 0, 1, 4, Pane.Priority.LOW);
+        OutlinePane divider = new OutlinePane(4, 1, 1, 2, Pane.Priority.LOW);
         divider.addItem(new GuiItem(new ItemStack(Material.IRON_BARS)));
         divider.setOnClick(inventoryClickEvent -> inventoryClickEvent.setCancelled(true));
         divider.setRepeat(true);
         tradeGUI.addPane(divider);
 
-        OutlinePane tradeStatusLeft = new OutlinePane(3, 0, 1, 4, Pane.Priority.LOW);
+        OutlinePane chestInfoItemSx = new OutlinePane(3,0,1,1);
+        chestInfoItemSx.addItem(new GuiItem(new ItemStack(Material.CHEST)));
+        chestInfoItemSx.setOnClick(inventoryClickEvent -> inventoryClickEvent.setCancelled(true));
+        tradeGUI.addPane(chestInfoItemSx);
+
+        OutlinePane tradeStatusLeft = new OutlinePane(3, 1, 1, 2, Pane.Priority.LOW);
         tradeStatusLeft.addItem(new GuiItem(new ItemStack(Material.WHITE_STAINED_GLASS_PANE)));
         tradeStatusLeft.setOnClick(inventoryClickEvent -> inventoryClickEvent.setCancelled(true));
         tradeStatusLeft.setRepeat(true);
         tradeGUI.addPane(tradeStatusLeft);
 
-        OutlinePane tradeStatusRight = new OutlinePane(5, 0, 1, 4, Pane.Priority.LOW);
+        ToggleButton toggleButtonSx = new ToggleButton(3, 3, 1, 1);
+        toggleButtonSx.setEnabledItem(new GuiItem(new ItemStack(Material.LIME_STAINED_GLASS_PANE)));
+        toggleButtonSx.setDisabledItem(new GuiItem(new ItemStack(Material.RED_STAINED_GLASS_PANE)));
+        tradeGUI.addPane(toggleButtonSx);
+
+        OutlinePane chestInfoItemDx = new OutlinePane(5,0,1,1);
+        chestInfoItemDx.addItem(new GuiItem(new ItemStack(Material.CHEST)));
+        chestInfoItemDx.setOnClick(inventoryClickEvent -> inventoryClickEvent.setCancelled(true));
+        tradeGUI.addPane(chestInfoItemDx);
+
+        OutlinePane tradeStatusRight = new OutlinePane(5, 1, 1, 2, Pane.Priority.LOW);
         tradeStatusRight.addItem(new GuiItem(new ItemStack(Material.WHITE_STAINED_GLASS_PANE)));
         tradeStatusRight.setOnClick(inventoryClickEvent -> inventoryClickEvent.setCancelled(true));
         tradeStatusRight.setRepeat(true);
         tradeGUI.addPane(tradeStatusRight);
 
-        OutlinePane leftInventory = new OutlinePane(0,0,3,4, Pane.Priority.LOW);
+        ToggleButton toggleButtonDx = new ToggleButton(5, 3, 1, 1);
+        toggleButtonDx.setEnabledItem(new GuiItem(new ItemStack(Material.LIME_STAINED_GLASS_PANE)));
+        toggleButtonDx.setDisabledItem(new GuiItem(new ItemStack(Material.RED_STAINED_GLASS_PANE)));
+        tradeGUI.addPane(toggleButtonDx);
 
+        OutlinePane leftInventory = new OutlinePane(0,0,3,4, Pane.Priority.LOW);
         tradeGUI.addPane(leftInventory);
         this.leftPane = leftInventory;
 
         OutlinePane rightInventory = new OutlinePane(6,0,3,4, Pane.Priority.LOW);
-
         tradeGUI.addPane(rightInventory);
         this.rightPane = rightInventory;
 
         tradeGUI.setOnClose(event -> {
-            /*
-            if (event.getPlayer() != playerOne && event.getPlayer() != playerTwo)
-                return;
-
-             */
-
-            Bukkit.getConsoleSender().sendMessage("TEST SETonClose! e' stato chiamato !");
-
             if (isClosed)
                 return;
 
@@ -105,7 +127,6 @@ public class TradeGui {
                 addPanelContentToInventory(playerOne,"right");
                 addPanelContentToInventory(playerTwo,"left");
                 closeTradeInventory();
-                //todo scambio degli inventari (fatto: non funziona il metodo addPanelContent....)
                 return;
             }
 
@@ -127,17 +148,20 @@ public class TradeGui {
         tradeGui.update();
     }
 
-    public Gui getGui() {
-        return tradeGui;
-    }
-
     public void addItemToPaneInventory(Player player, ItemStack itemStack) {
 
         GuiItem guiItem = new GuiItem(itemStack);
         guiItem.setAction(inventoryClickEvent -> {
             if (inventoryClickEvent.getWhoClicked() == player) {
+                if (this.clickCD.get(player.getUniqueId())) {
+                    inventoryClickEvent.setCancelled(true);
+                    return;
+                }
+                this.clickCD.put(player.getUniqueId(),true);
+                Bukkit.getScheduler().scheduleSyncDelayedTask(FWTrade.plugin,
+                        () -> clickCD.put(player.getUniqueId(),false), 25);
                 player.getInventory().addItem(guiItem.getItem());
-                tradeGui.getItems().remove(guiItem);
+                removeGuiItem(guiItem.getUUID());
             }
             else
                 inventoryClickEvent.setCancelled(true);
@@ -157,54 +181,90 @@ public class TradeGui {
 
     }
 
-    public boolean isAddable(Player player) {
-        Inventory inventory = tradeGui.getInventory();
-        //this.rightPane.getItems()   todo: e poi un for che cerca un null
-        if (player.equals(playerOne)) {
-            for (int index : indexLeft) {
-                if (inventory.getItem(index) == null)
-                    return true;
+    private void removeGuiItem(UUID uuid) {
+        for (GuiItem guiItem : leftPane.getItems()) {
+            if (guiItem.getUUID() == uuid){
+                leftPane.removeItem(guiItem);
+                tradeGui.update();
+                return;
             }
         }
-        if (player.equals(playerTwo)) {
-            for (int index : indexRight) {
-                if (inventory.getItem(index) == null)
-                    return true;
+
+        for (GuiItem guiItem : rightPane.getItems()) {
+            if (guiItem.getUUID() == uuid){
+                rightPane.removeItem(guiItem);
+                tradeGui.update();
+                return;
             }
         }
-        return false;
+
     }
 
+    public boolean isAddable(Player player) {
+       // Inventory inventory = tradeGui.getInventory();
+        if (player == playerOne && leftPane.getItems().size() != 12)
+            return true;
 
+        return player == playerTwo && rightPane.getItems().size() != 12;
 
-    public void addPanelContentToInventory(Player player, String string) {
-        ItemStack[] itemStacks = tradeGui.getInventory().getContents();
+    }
+
+    private void addPanelContentToInventory(Player player, String string) {
         switch(string.toLowerCase()) {
             case "LEFT":
-                for (int i : indexLeft) {
-                    player.getInventory().addItem(itemStacks[i]);
+                for (GuiItem guiItem : leftPane.getItems()) {
+                    player.getInventory().addItem(guiItem.getItem());
                 }
                 break;
             case "RIGHT":
-                for (int i : indexRight) {
-                    player.getInventory().addItem(itemStacks[i]);
+                for (GuiItem guiItem : rightPane.getItems()) {
+                    player.getInventory().addItem(guiItem.getItem());
                 }
                 break;
         }
     }
 
-    public void closeTradeInventory() {
+    private void closeTradeInventory() {
         for (HumanEntity player : tradeGui.getViewers()) {
             player.closeInventory();
         }
     }
 
-    public boolean isPlayerOneTradeReady() {
+    private boolean isPlayerOneTradeReady() {
         return this.tradeStatusLeft;
     }
 
-    public boolean isPlayerTwoTradeReady(){
+    private boolean isPlayerTwoTradeReady(){
         return tradeStaturRight;
+    }
+
+    private ItemStack itemTaxInfo() {
+        ItemStack paperINFO = new ItemStack(Material.PAPER);
+        ItemMeta paperINFOmeta = paperINFO.getItemMeta();
+        paperINFOmeta.setDisplayName(ChatColor.YELLOW + "TAX");
+
+        List<String> paperINFOmetaLORE = new ArrayList<>();
+        paperINFOmetaLORE.add(ChatColor.GRAY + "tassa sul commercio ?");
+        paperINFOmetaLORE.add(ChatColor.AQUA + "potrebbe dipendere anche dalla distanza tra i due player");
+        paperINFOmetaLORE.add(ChatColor.RED + "color color color color color");
+        paperINFOmeta.setLore(paperINFOmetaLORE);
+        paperINFO.setItemMeta(paperINFOmeta);
+
+        return paperINFO;
+    }
+
+    private ItemStack itemGoldIngot() {
+        ItemStack goldIngotItem = new ItemStack(Material.GOLD_INGOT);
+        ItemMeta goldIngotMeta = goldIngotItem.getItemMeta();
+        goldIngotMeta.setDisplayName(ChatColor.YELLOW + "ADD MONEY TO TRADE");
+
+        List<String> goldIngotLore = new ArrayList<>();
+        goldIngotLore.add(ChatColor.GREEN + "Clicca per aggiungere 100z allo scambio");
+        goldIngotLore.add(ChatColor.GREEN + "Ricorda che gli zenar sono tassati");
+        goldIngotMeta.setLore(goldIngotLore);
+        goldIngotItem.setItemMeta(goldIngotMeta);
+
+        return goldIngotItem;
     }
 
 }
